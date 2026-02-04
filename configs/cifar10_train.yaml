@@ -19,6 +19,14 @@ data:
 model:
   init_ckpt: "./weights/32x32_ckpt_8_diffusion.pth"
   classifier_ckpt: "./weights/WideResNet_70_16_dropout_cifar10.pth"
+
+  # ==========================================
+  # [新增] 下面这三行必须补上，否则代码不知道模型长啥样
+  # ==========================================
+  depth: 70           # 深度
+  widen_factor: 16    # 宽度
+  dropRate: 0.3       # Dropout
+  # ==========================================
   
   # --- Score-SDE 核心参数 ---
   name: 'ncsnpp'
@@ -58,7 +66,8 @@ training:
   log_freq: 100
   snapshot_freq: 5000
   advtrain: True
-  tune_T: 0.2
+  tune_T_min: 0.1
+  tune_T_max: 0.2
   beta_d: 19.9
   beta_min: 0.1
 

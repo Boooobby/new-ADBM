@@ -42,7 +42,7 @@ def main():
     
     # 3. Models
     unet = get_unet(config, ckpt_path=config.model.init_ckpt, device=accelerator.device)
-    classifier = get_classifier(dataset=config.dataset, ckpt_path=config.model.classifier_ckpt, device=accelerator.device)
+    classifier = get_classifier(config, accelerator.device)
     
     # 4. Components
     optimizer = torch.optim.Adam(unet.parameters(), lr=config.optim.lr, betas=(config.optim.beta1, 0.999))

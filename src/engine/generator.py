@@ -21,7 +21,7 @@ class AdversarialGenerator:
         self.inverse_scaler = get_data_inverse_scaler(self.eps) # [-1,1] -> [0,1]
     
     def generate(self, classifier, unet, loss_module, 
-                 clean_images, labels, fixed_t, fixed_noise):
+                 clean_images, labels, fixed_t, fixed_noise, current_T_val):
         """
         clean_images: [0, 1] 范围
         """
@@ -53,8 +53,7 @@ class AdversarialGenerator:
             
             # 计算系数 (基于 fixed_t)
             alpha_t = loss_module.get_alpha(fixed_t).view(-1, 1, 1, 1)
-            tune_T_val = loss_module.tune_T_val # 需要在 Loss 模块里存一下这个值
-            T_tensor = torch.full_like(fixed_t, tune_T_val)
+            T_tensor = torch.full_like(fixed_t, current_T_val)
             alpha_T = loss_module.get_alpha(T_tensor).view(-1, 1, 1, 1)
 
             # 计算 Bridge 系数

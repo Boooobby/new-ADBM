@@ -31,7 +31,8 @@ class ADBMTrainer:
         self.train_loader = train_loader
         self.val_loader = val_loader
         
-        self.tune_T = config.training.tune_T
+        self.tune_T_min = config.training.tune_T_min
+        self.tune_T_max = config.training.tune_T_max
         self.epsilon_t = 1e-5
         self.scaler = get_data_scaler(config) # 获取 [0,1]->[-1,1] 转换器
 
@@ -56,8 +57,13 @@ class ADBMTrainer:
             # 1. 显式采样 (Explicit Sampling)
             B = images.shape[0]
             device = images.device
+
+            # 1. [新增] 动态采样当前的 T (Bridge 的起点)
+            # 在 [0.1, 0.2] 之间均匀采样一个标量
+            current_T_val = (torch.rand(1, device=device).item() * (self.tune_T_max - self.tune_T_min) + 
+                            self.tune_T_min)
             
-            t = torch.rand(B, device=device) * (self.tune_T - self.epsilon_t) + self.epsilon_t
+            t = torch.rand(B, device=device) * (current_T_val - self.epsilon_t) + self.epsilon_t
             noise = torch.randn_like(images)
             
             # 2. 生成对抗扰动 (Generator)
@@ -70,7 +76,8 @@ class ADBMTrainer:
                     clean_images=images, # 传入 [0, 1]
                     labels=labels,
                     fixed_t=t,
-                    fixed_noise=noise
+                    fixed_noise=noise, 
+                    current_T_val=current_T_val
                 )
             else:
                 adv_perturbation = None
@@ -89,7 +96,7 @@ class ADBMTrainer:
                 t=t,
                 noise=noise,
                 adv_perturbation=adv_perturbation, # Generator 已经返回 [-1, 1] 尺度的扰动
-                tune_T_val=self.tune_T
+                tune_T_val=current_T_val # <--- 关键传参：告诉 Loss 这一步的终点是哪里
             )
             
             self.accelerator.backward(loss)
