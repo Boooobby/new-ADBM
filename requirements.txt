@@ -1,0 +1,20 @@
+# 核心科学计算库 (必须锁定 numpy < 2.0，否则旧代码会崩)
+numpy<2.0
+scipy
+pandas
+pyyaml
+tqdm
+
+# 编译工具 (编译 score_sde 的 CUDA 扩展必须)
+ninja
+
+# AI 训练相关库
+accelerate>=0.25.0
+robustbench>=1.1
+torch-ema
+tensorboard
+matplotlib
+diffusers
+
+# 解决兼容性问题的特定版本
+protobuf==3.20.3

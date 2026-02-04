@@ -1,0 +1,27 @@
+name: new-adbm
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pytorch=2.1.2
+  - torchvision=0.16.2
+  - torchaudio=2.1.2
+  - pytorch-cuda=11.8
+  - numpy<2.0
+  - scipy
+  - pandas
+  - pyyaml
+  - tqdm
+  # 显式添加 accelerate 到 conda 依赖 (conda-forge 有维护)
+  - accelerate>=0.25.0 
+  - pip
+  - pip:
+    # 再次在 pip 中列出以防万一，pip 会自动满足版本
+    - robustbench>=1.1
+    - torch-ema
+    - tensorboard
+    - matplotlib
+    - diffusers # 如果后续wrapper需要用到
