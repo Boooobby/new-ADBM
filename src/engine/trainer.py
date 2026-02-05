@@ -4,6 +4,8 @@ from tqdm import tqdm
 from accelerate import Accelerator
 from src.utils.checkpoint import save_checkpoint
 from src.utils.data import get_data_scaler
+from torch.utils.tensorboard import SummaryWriter
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +37,8 @@ class ADBMTrainer:
         self.tune_T_max = config.training.tune_T_max
         self.epsilon_t = 1e-5
         self.scaler = get_data_scaler(config) # 获取 [0,1]->[-1,1] 转换器
+
+        self.writer = SummaryWriter(log_dir=os.path.join(config.output_dir, 'tf_logs'))
 
     def train(self, start_step=0, max_steps=100000):
         
@@ -127,6 +131,31 @@ class ADBMTrainer:
                         },
                         step=step
                     )
+            
+            # 3. 记录 Loss (每 10 步或者 100 步记一次)
+            if step % 10 == 0:
+                # add_scalar(图表标题, Y轴数值, X轴步数)
+                self.writer.add_scalar('Train/Loss', loss.item(), step)
+                
+                # 如果你想看 T 的采样情况
+                self.writer.add_scalar('Train/Sampled_T', current_T_val, step)
+
+            """
+            # 4. (可选) 记录图片 (每 500 步看一眼效果)
+            # 假设 images 是 [B, C, H, W] 且已经归一化到 [0, 1] 或 [-1, 1]
+            if step % 500 == 0:
+                # make_grid 可以把一个 batch 的图拼成一张大图
+                from torchvision.utils import make_grid
+                
+                # 注意：如果 image 是 [-1, 1]，通常需要 (img + 1) / 2 转回 [0, 1] 显示
+                grid = make_grid((images_norm[:8] + 1) / 2) 
+                self.writer.add_image('Images/Clean', grid, step)
+                
+                if adv_perturbation is not None:
+                    # 可视化噪声 (通常噪声很小，可能需要 * 10 才能看清模式)
+                    noise_grid = make_grid(torch.abs(adv_perturbation[:8]))
+                    self.writer.add_image('Images/Adv_Noise', noise_grid, step)
+            """
             
             step += 1
             
