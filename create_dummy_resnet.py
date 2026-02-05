@@ -12,7 +12,7 @@ def create_fake_weights():
         depth=28, 
         widen_factor=10, 
         dropRate=0.3, 
-        num_classes=10
+        num_classes=10  # 分类数量
     )
     
     # 2. 准备保存路径

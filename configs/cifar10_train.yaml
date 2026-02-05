@@ -62,7 +62,7 @@ model:
 # [训练参数]
 training:
   batch_size: 64
-  total_iterations: 50
+  total_iterations: 500
   log_freq: 100
   snapshot_freq: 5000
   advtrain: True
